@@ -42,7 +42,7 @@ class TaskReset {
 
                 Log.log("Resetting task " + taskRef.getKey());
 
-                @SuppressWarnings("unchecked") Map<String, Object> value = task.getValue(Map.class);
+                @SuppressWarnings("unchecked") Map<String, Object> value = (Map<String, Object>) task.getValue();
                 Object taskOwner = value.get(Task.OWNER_KEY);
                 // if the ownerId is null it means that we're force resetting this task, so we allow it to go through
                 boolean ownersMatch = ownerId == null || ownerId.equals(taskOwner);

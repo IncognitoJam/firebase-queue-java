@@ -199,7 +199,7 @@ public class Task {
                     return Transaction.success(task);
                 }
 
-                @SuppressWarnings("unchecked") Map<String, Object> value = task.getValue(Map.class);
+                @SuppressWarnings("unchecked") Map<String, Object> value = (Map<String, Object>) task.getValue();
                 String ourInProgressState = taskSpec.getInProgressState();
                 Object taskState = value.get(STATE_KEY);
                 Object taskOwner = value.get(OWNER_KEY);
@@ -312,7 +312,7 @@ public class Task {
                     return Transaction.success(task);
                 }
 
-                @SuppressWarnings("unchecked") Map<String, Object> value = task.getValue(Map.class);
+                @SuppressWarnings("unchecked") Map<String, Object> value = (Map<String, Object>) task.getValue();
                 String ourInProgressState = taskSpec.getInProgressState();
                 Object taskState = value.get(STATE_KEY);
                 Object taskOwner = value.get(OWNER_KEY);

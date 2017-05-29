@@ -70,47 +70,47 @@ class TaskClaimer {
             private boolean malformed;
 
             @Override
-            public Transaction.Result doTransaction(MutableData taskSnpashot) {
+            public Transaction.Result doTransaction(MutableData taskSnapshot) {
                 if (interrupted) {
                     Log.debug("Claiming task " + taskRef.getKey() + " on " + ownerId + " was interrupted before we started the transaction");
                     return Transaction.abort();
                 }
 
                 // if this task no longer exists
-                if (taskSnpashot.getValue() == null) {
+                if (taskSnapshot.getValue() == null) {
                     Log.debug("Tried claiming task " + taskRef.getKey() + " on " + ownerId + " after someone else removed it");
-                    return Transaction.success(taskSnpashot);
+                    return Transaction.success(taskSnapshot);
                 }
 
                 // if the task is not in a format that we can understand
-                if (!(taskSnpashot.getValue() instanceof Map)) {
-                    Log.debug("Tried claiming task " + taskRef.getKey() + " on " + ownerId + " but it was malformed (" + taskSnpashot.getValue() + ")", Log.Level.WARN);
+                if (!(taskSnapshot.getValue() instanceof Map)) {
+                    Log.debug("Tried claiming task " + taskRef.getKey() + " on " + ownerId + " but it was malformed (" + taskSnapshot.getValue() + ")", Log.Level.WARN);
 
                     malformed = true;
                     String error = "Task was malformed";
 
                     Map<String, Object> errorDetails = new HashMap<>(2);
                     errorDetails.put(Task.ERROR_KEY, error);
-                    errorDetails.put(Task.ORIGINAL_TASK_KEY, taskSnpashot.getValue());
+                    errorDetails.put(Task.ORIGINAL_TASK_KEY, taskSnapshot.getValue());
 
                     Map<String, Object> errorMap = new HashMap<>(3);
                     errorMap.put(Task.STATE_KEY, taskSpec.getErrorState());
                     errorMap.put(Task.STATE_CHANGED_KEY, ServerValue.TIMESTAMP);
                     errorMap.put(Task.ERROR_DETAILS_KEY, errorDetails);
 
-                    taskSnpashot.setValue(errorMap);
-                    return Transaction.success(taskSnpashot);
+                    taskSnapshot.setValue(errorMap);
+                    return Transaction.success(taskSnapshot);
                 }
 
-                @SuppressWarnings("unchecked") Map<String, Object> value = taskSnpashot.getValue(Map.class);
+                @SuppressWarnings("unchecked") Map<String, Object> value = (Map<String, Object>) taskSnapshot.getValue();
                 String ourStartState = taskSpec.getStartState();
                 Object taskState = value.get(Task.STATE_KEY);
                 if (ourStartState == taskState || (ourStartState != null && ourStartState.equals(taskState))) {
                     value.put(Task.STATE_KEY, taskSpec.getInProgressState());
                     value.put(Task.STATE_CHANGED_KEY, ServerValue.TIMESTAMP);
                     value.put(Task.OWNER_KEY, ownerId);
-                    taskSnpashot.setValue(value);
-                    return Transaction.success(taskSnpashot);
+                    taskSnapshot.setValue(value);
+                    return Transaction.success(taskSnapshot);
                 } else {
                     Log.debug("Tried claiming task " + taskRef.getKey() + " on " + ownerId + " but its _state (" + taskState + ") did not match our _start_state (" + ourStartState + ")");
                     return Transaction.abort();
@@ -142,7 +142,7 @@ class TaskClaimer {
                     } else {
                         Log.debug("Claimed task " + taskKey + " on " + ownerId);
 
-                        @SuppressWarnings("unchecked") Map<String, Object> value = snapshot.getValue(Map.class);
+                        @SuppressWarnings("unchecked") Map<String, Object> value = (Map<String, Object>) snapshot.getValue();
                         if (sanitize) {
                             for (String key : SANITIZE_KEYS) {
                                 value.remove(key);

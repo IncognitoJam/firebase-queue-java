@@ -177,7 +177,7 @@ public class Queue {
         }
 
         private long getTimeoutDelay(DataSnapshot snapshot) {
-            @SuppressWarnings("unchecked") Map<String, Object> value = snapshot.getValue(Map.class);
+            @SuppressWarnings("unchecked") Map<String, Object> value = (Map<String, Object>) snapshot.getValue();
             Object timeStartedVal = value.get(Task.STATE_CHANGED_KEY);
             if (timeStartedVal instanceof Long) {
                 long timeStarted = (Long) timeStartedVal;
